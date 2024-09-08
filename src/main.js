@@ -13,21 +13,28 @@ const lightbox = new SimpleLightbox('.gallery-link', {
 
 const loader = document.querySelector('.loader');
 const submitForm = document.querySelector('.form');
+const loadMore = document.querySelector('.load-more');
 const gallery = document.querySelector('.image-gallery');
 
 submitForm.addEventListener('submit', handleSubmit);
+loadMore.addEventListener('click', handleLoadMore);
+
+let page = 1;
+let searchResult = '';
+loadMore.style.display = 'none';
 
 function handleSubmit(event) {
   gallery.innerHTML = '';
   event.preventDefault();
   const form = event.target;
-  const searchResult = form.elements.picture.value.trim();
+  searchResult = form.elements.picture.value.trim();
   loader.style.display = 'inline-block';
-  imageFetch(searchResult)
+  imageFetch(searchResult, page)
     .then(response => {
       loader.style.display = 'none';
       if (response.hits.length > 0) {
-        renderImages(response);
+        gallery.insertAdjacentHTML('beforeend', renderImages(response));
+        loadMore.style.display = 'block';
         lightbox.refresh();
       } else {
         iziToast.show({
@@ -47,4 +54,20 @@ function handleSubmit(event) {
         messageColor: '#fff',
       });
     });
+}
+
+function handleLoadMore() {
+  const picture = document
+    .querySelector('.image-gallery')
+    .lastElementChild.getBoundingClientRect();
+  page++;
+  loader.style.display = 'inline-block';
+  imageFetch(searchResult, page).then(response => {
+    loader.style.display = 'none';
+    gallery.insertAdjacentHTML('beforeend', renderImages(response));
+    window.scrollBy({
+      top: picture.bottom,
+      behavior: 'smooth',
+    });
+  });
 }

@@ -1,7 +1,5 @@
 export default function renderImages(images) {
-  const gallery = document.querySelector('.image-gallery');
-  gallery.innerHTML = '';
-  const markup = images.hits
+  return images.hits
     .map(image => {
       const {
         webformatURL,
@@ -32,5 +30,4 @@ export default function renderImages(images) {
           </li>`;
     })
     .join('');
-  gallery.innerHTML = markup;
 }
