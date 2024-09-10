@@ -20,11 +20,11 @@ submitForm.addEventListener('submit', handleSubmit);
 loadMore.addEventListener('click', handleLoadMore);
 
 let page;
-let per_page = 15;
+const per_page = 15;
 let totalItems;
 let totalPages;
 let searchResult = '';
-loadMore.style.display = 'none';
+// loadMore.style.display = 'none';
 
 function handleSubmit(event) {
   page = 1;
@@ -41,6 +41,7 @@ function handleSubmit(event) {
       if (response.hits.length > 0) {
         gallery.insertAdjacentHTML('beforeend', renderImages(response));
         if (totalPages <= page) {
+          loadMore.style.display = 'none';
           iziToast.show({
             message: `Sorry, there are no more images to load!`,
             position: 'topRight',
@@ -52,6 +53,7 @@ function handleSubmit(event) {
           lightbox.refresh();
         }
       } else {
+        loadMore.style.display = 'none';
         iziToast.show({
           message: `❌ Sorry, there are no images matching your search query.`,
           position: 'topRight',
@@ -85,7 +87,6 @@ function handleLoadMore() {
         behavior: 'smooth',
       });
     });
-
     if (totalPages <= page) {
       loadMore.style.display = 'none';
       iziToast.show({

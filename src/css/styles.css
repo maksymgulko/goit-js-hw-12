@@ -44,6 +44,7 @@ body {
 }
 
 .load-more {
+  display: none;
   margin: 0 auto;
   color: #fff;
   font: inherit;
