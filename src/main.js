@@ -26,67 +26,68 @@ let totalPages;
 let searchResult = '';
 // loadMore.style.display = 'none';
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
+  event.preventDefault();
   page = 1;
   gallery.innerHTML = '';
-  event.preventDefault();
   const form = event.target;
   searchResult = form.elements.picture.value.trim();
   loader.style.display = 'inline-block';
-  imageFetch(searchResult)
-    .then(response => {
-      totalItems = response.totalHits;
-      totalPages = totalItems / per_page;
-      loader.style.display = 'none';
-      if (response.hits.length > 0) {
-        gallery.insertAdjacentHTML('beforeend', renderImages(response));
-        if (totalPages <= page) {
-          loadMore.style.display = 'none';
-          iziToast.show({
-            message: `Sorry, there are no more images to load!`,
-            position: 'topRight',
-            backgroundColor: '#2596be',
-            messageColor: '#fff',
-          });
-        } else {
-          loadMore.style.display = 'block';
-          lightbox.refresh();
-        }
-      } else {
+
+  try {
+    const response = await imageFetch(searchResult);
+    totalItems = response.totalHits;
+    totalPages = totalItems / per_page;
+    loader.style.display = 'none';
+
+    if (response.hits.length > 0) {
+      gallery.insertAdjacentHTML('beforeend', renderImages(response));
+      if (totalPages <= page) {
         loadMore.style.display = 'none';
         iziToast.show({
-          message: `❌ Sorry, there are no images matching your search query.`,
+          message: `Sorry, there are no more images to load!`,
           position: 'topRight',
-          backgroundColor: '#F44336',
+          backgroundColor: '#2596be',
           messageColor: '#fff',
         });
+      } else {
+        loadMore.style.display = 'block';
+        lightbox.refresh();
       }
-    })
-    .catch(error => {
-      loader.style.display = 'none';
+    } else {
+      loadMore.style.display = 'none';
       iziToast.show({
-        message: `${error.message}`,
+        message: `❌ Sorry, there are no images matching your search query.`,
         position: 'topRight',
         backgroundColor: '#F44336',
         messageColor: '#fff',
       });
+    }
+  } catch (error) {
+    loader.style.display = 'none';
+    iziToast.show({
+      message: `${error.message}`,
+      position: 'topRight',
+      backgroundColor: '#F44336',
+      messageColor: '#fff',
     });
+  }
 }
 
-function handleLoadMore() {
-  page++;
+async function handleLoadMore() {
   try {
+    page++;
     const picture = gallery.lastElementChild.getBoundingClientRect();
     loader.style.display = 'inline-block';
-    imageFetch(searchResult, page).then(response => {
-      loader.style.display = 'none';
-      gallery.insertAdjacentHTML('beforeend', renderImages(response));
-      lightbox.refresh();
-      window.scrollBy({
-        top: picture.bottom,
-        behavior: 'smooth',
-      });
+    const response = await imageFetch(searchResult, page);
+    loader.style.display = 'none';
+    gallery.insertAdjacentHTML('beforeend', renderImages(response));
+    lightbox.refresh();
+    window.scrollBy({
+      top: picture.bottom,
+      behavior: 'smooth',
     });
+
     if (totalPages <= page) {
       loadMore.style.display = 'none';
       iziToast.show({
